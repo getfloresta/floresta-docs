@@ -5,12 +5,14 @@ Floresta is a collection of Rust libraries designed for building a Bitcoin full 
 A key feature of Floresta is its use of the [utreexo accumulator](https://eprint.iacr.org/2019/611) to maintain the UTXO set in a highly compact format. It also incorporates innovative techniques to significantly reduce Initial Block Download (IBD) times with minimal security tradeoffs.
 
 > The Utreexo accumulator consists of a forest of merkle trees where leaves are individual UTXOs, thus the name U-Tree-XO. The UTXO set at any moment is represented as the **merkle roots of the forest**.
-> 
+>
 > The novelty in this cryptographic system is a mechanism to update the forest, both adding new UTXOs and deleting existing ones from the set. When a transaction spends UTXOs we can verify it with an inclusion proof, and then delete those specific UTXOs from the set.
 
 Currently, the node can only operate in pruned mode, meaning it deletes block data after validation. Combined with utreexo, this design keeps storage requirements exceptionally low (< 1 GB).
 
-The ultimate vision for Floresta is to deliver a reliable and ultra-lightweight node implementation capable of running on low-resource devices, democratizing the access to the Bitcoin blockchain. However, keep in mind that Floresta remains **highly experimental software** ⚠️.
+The ultimate vision for Floresta is to deliver a reliable and ultra-lightweight node implementation capable of running on low-resource devices, democratizing the access to the Bitcoin blockchain.
+
+⚠️ Keep in mind that Floresta is still highly experimental. **We do not recommend using it for transactions involving meaningful amounts of satoshis.** If you notice a bug or anything that seems incorrect, please open an issue in the [official Floresta repository](https://github.com/getfloresta/Floresta).
 
 ## About This Book
 
