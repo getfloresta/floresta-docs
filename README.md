@@ -25,7 +25,7 @@ Each time a change is pushed to main, the updated book is automatically deployed
 Building the book requires [mdBook](https://github.com/rust-lang/mdBook). To get it, assuming you have Rust installed, run:
 
 ```bash
-cargo install mdbook --locked
+cargo install mdbook --version 0.4.45 --locked
 ```
 
 Moreover, this book uses two mdBook plugins:
@@ -41,6 +41,14 @@ cargo install mdbook-linkcheck
 ```bash
 cargo install mdbook-quiz --locked
 ```
+
+> **⚠️ Version Compatibility Note**
+>
+> We currently require **mdbook v0.4.45** because the latest version of mdbook-quiz (v0.4.0) 
+> is not compatible with mdbook v0.5.x. The incompatibility stems from breaking API changes 
+> introduced in [mdbook v0.5.0](https://github.com/rust-lang/mdBook/blob/master/CHANGELOG.md#mdbook-050).
+>
+> Once mdbook-quiz releases a version compatible with mdbook v0.5.x, we will update this requirement.
 
 ## Building
 

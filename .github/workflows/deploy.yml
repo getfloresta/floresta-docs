@@ -20,9 +20,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Pin mdbook to v0.4.45 due to mdbook-quiz v0.4.0 compatibility requirements
+      # See: https://github.com/rust-lang/mdBook/blob/master/CHANGELOG.md#mdbook-050
       - name: Install mdbook
         run: |
-          cargo install mdbook --locked
+          cargo install mdbook --version 0.4.45 --locked
           mdbook -V
 
       - name: Install mdbook-linkcheck
