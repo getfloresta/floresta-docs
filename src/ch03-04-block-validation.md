@@ -38,13 +38,13 @@ pub fn validate_block_no_acc(
     // Validate block transactions
     let subsidy = read_lock!(self).consensus.get_subsidy(height);
     let verify_script = self.verify_script(height)?;
-    #[cfg(feature = "bitcoinconsensus")]
-    let flags = read_lock!(self)
-        .consensus
-        .parameters
+    #[cfg(feature = "bitcoinkernel")]
+    let flags = self
+        .chain_params()
         .get_validation_flags(height, block.block_hash());
-    #[cfg(not(feature = "bitcoinconsensus"))]
+    #[cfg(not(feature = "bitcoinkernel"))]
     let flags = 0;
+
     Consensus::verify_block_transactions(
         height,
         inputs,
@@ -86,7 +86,7 @@ fn verify_script(&self, height: u32) -> Result<bool, PersistedState::Error> {
 }
 ```
 
-We also get the validation flags for the current height with `get_validation_flags`, only if the `bitcoinconsensus` feature is active. These flags are used to validate transactions taking into account the different consensus rules that have been added over time.
+We also get the validation flags for the current height with `get_validation_flags`, only if the `bitcoinkernel` feature is active. These flags are used to validate transactions taking into account the different consensus rules that have been added over time.
 
 And lastly we call the `Consensus::verify_block_transactions` associated function.
 

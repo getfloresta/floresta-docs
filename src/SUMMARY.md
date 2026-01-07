@@ -18,7 +18,7 @@
   - [Connecting Blocks](ch03-03-connecting-blocks.md)
   - [Block Validation](ch03-04-block-validation.md)
 
-- [Consensus and bitcoinconsensus](ch04-00-consensus-and-bitcoinconsensus.md)
+- [Consensus and bitcoinkernel](ch04-00-consensus-and-bitcoinkernel.md)
   - [Transaction Validation](ch04-01-transaction-validation.md)
   - [Utreexo Validation](ch04-02-utreexo-validation.md)
 

@@ -9,7 +9,7 @@ This is the struct that holds the meat of the matter (or should we say the root 
 - `subscribers`: A vector of trait objects (different types allowed) that implement the `BlockConsumer` trait, indicating they want to get notified when a new valid block arrives.
 - `fee_estimation`: Fee estimation for the next 1, 10 and 20 blocks, as a tuple of three f64.
 - `ibd`: A boolean indicating if we are in IBD.
-- `consensus`: Parameters for the chain validation, as a `Consensus` struct (a Floresta type that will be explained in detail in [Chapter 4](ch04-00-consensus-and-bitcoinconsensus.md)).
+- `consensus`: Parameters for the chain validation, as a `Consensus` struct (a Floresta type that will be explained in detail in [Chapter 4](ch04-00-consensus-and-bitcoinkernel.md)).
 - `assume_valid`: As an `Option<BlockHash>`.
 
 Note that the accumulator and the best block data are kept in our `ChainStore`, but we cache them in `ChainStateInner` for faster access, avoiding potential disk reads and deserializations (e.g., loading them from the `meta` bucket if we use `KvChainStore`).

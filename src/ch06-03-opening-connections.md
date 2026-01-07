@@ -204,6 +204,7 @@ pub(crate) fn open_connection(
         peer_count,
         LocalPeerView {
             // Fields omitted for brevity :P
+            # message_times: FractionAvg::new(0, 0),
             # address: address.get_net_address(),
             # port: address.get_port(),
             # user_agent: "".to_string(),
