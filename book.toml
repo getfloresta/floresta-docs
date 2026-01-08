@@ -16,6 +16,9 @@ level = 1
 
 [output.linkcheck]
 follow-web-links = true
+exclude = [
+  '^https?://medium\.com/interdax/utreexo-compressing-fully-validating-bitcoin-nodes-4174d95e0626$',
+]
 
 [output.linkcheck.http-headers]
 # some sites return 404 on HEAD unless we explicitly ask for HTML
