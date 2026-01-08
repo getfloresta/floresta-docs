@@ -4,9 +4,7 @@ on:
   schedule:
     - cron: "0 5 * * *" # Run daily at 5 AM UTC
   push:
-    branches: [main]
   pull_request:
-    branches: [main]
 
 env:
   CARGO_TERM_COLOR: always
@@ -31,3 +29,27 @@ jobs:
           cd snippet-checker
           cargo build --release
           ./target/release/snippet_checker
+
+  build-book:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mdbook
+        run: |
+          cargo install mdbook --version 0.4.45 --locked
+          mdbook -V
+
+      - name: Install mdbook-linkcheck
+        run: |
+          cargo install mdbook-linkcheck --locked
+          mdbook-linkcheck -V
+
+      - name: Install mdbook-quiz
+        run: |
+          cargo install mdbook-quiz --locked
+          mdbook-quiz -V
+
+      - name: Build Book
+        run: |
+          mdbook build
