@@ -1,11 +1,11 @@
 # Floresta Docs
 
-[![CI](https://github.com/JoseSK999/floresta-docs/workflows/CI/badge.svg)](https://github.com/JoseSK999/floresta-docs/actions/workflows/main.yml)
-[![Deploy](https://github.com/JoseSK999/floresta-docs/workflows/Deploy/badge.svg)](https://github.com/JoseSK999/floresta-docs/actions/workflows/deploy.yml)
+[![CI](https://github.com/getfloresta/floresta-docs/workflows/CI/badge.svg)](https://github.com/getfloresta/floresta-docs/actions/workflows/main.yml)
+[![Deploy](https://github.com/getfloresta/floresta-docs/workflows/Deploy/badge.svg)](https://github.com/getfloresta/floresta-docs/actions/workflows/deploy.yml)
 
-This repository contains the source for the `Floresta Docs` mdBook, an in-depth explanation of the [Floresta](https://github.com/vinteumorg/Floresta) libraries for building a full Bitcoin node.
+This repository contains the source for the `Floresta Docs` mdBook, an in-depth explanation of the [Floresta](https://github.com/getfloresta/Floresta) libraries for building a full Bitcoin node.
 
-You can either build the book locally, as explained below, or [read it online](https://josesk999.github.io/floresta-docs/).
+You can either build the book locally, as explained below, or [read it online](https://getfloresta.github.io/floresta-docs/).
 
 > [!Note]
 > This book is fully functional and ready to use, though we might add a few appendices or extra chapters down the road.

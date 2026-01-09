@@ -291,6 +291,6 @@ If one of `pow_fraud_proofs` or `assume_utreexo` is set, the `backfill` option e
 
 For block filters, `filter_start_height` helps optimize downloads by starting from a specific height rather than the chain’s beginning. In relation to networking, `user_agent` allows nodes to customize their identifier when advertising to peers. Also, `allow_v1_fallback` is used for specifying if our node should use the version 1 P2P transport protocol as a fallback if we encounter a problem when connecting via the [version 2 transport](https://github.com/bitcoin/bips/blob/master/bip-0324.mediawiki).
 
-Lastly, if `disable_dns_seeds` is set, our node will not perform any DNS seed lookups to find peers. Instead, it will use hardcoded peer addresses, found at the `floresta-wire` [seeds subdirectory](https://github.com/vinteumorg/Floresta/tree/master/crates/floresta-wire/src/p2p_wire/seeds).
+Lastly, if `disable_dns_seeds` is set, our node will not perform any DNS seed lookups to find peers. Instead, it will use hardcoded peer addresses, found at the `floresta-wire` [seeds subdirectory](https://github.com/getfloresta/Floresta/tree/master/crates/floresta-wire/src/p2p_wire/seeds).
 
 This flexible configuration ensures adaptability for various use cases and security levels, from development to production.

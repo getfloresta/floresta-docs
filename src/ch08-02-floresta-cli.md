@@ -71,4 +71,4 @@ floresta-cli rescanblockchain 100 200
 floresta-cli getblockchaininfo
 ```
 
-For more details about the `floresta-cli` usage and RPC commands, you can check the [Floresta doc folder](https://github.com/vinteumorg/Floresta/blob/master/doc).
+For more details about the `floresta-cli` usage and RPC commands, you can check the [Floresta doc folder](https://github.com/getfloresta/Floresta/blob/master/doc).

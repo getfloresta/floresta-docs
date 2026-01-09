@@ -17,7 +17,7 @@ jobs:
 
       - name: Clone Floresta repository
         run: |
-          git clone https://github.com/vinteumorg/Floresta.git
+          git clone https://github.com/getfloresta/Floresta.git
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
