@@ -8,7 +8,7 @@ We'll first look at how the binary sets things up, and then we'll dive into `Flo
 
 The very first thing we do in the `florestad` main function is parsing any CLI argument and create the actual data directory, if not already present. Then, we build the `Config` from the CLI arguments and try to daemonize the process.
 
-Also, if logging to `stdout` or a file is enabled, we call `init_logging` to initialize a tracing subscriber. This subscriber may also include [tokio-console](https://github.com/tokio-rs/console) (a utility from the Tokio project that lets you inspect all running async tasks in real time) if you run `florestad` with the `tokio-console` feature. You can learn more about tokio console usage in the [Floresta doc folder](https://github.com/vinteumorg/Floresta/blob/master/doc/run.md#using-tokio-console).
+Also, if logging to `stdout` or a file is enabled, we call `init_logging` to initialize a tracing subscriber. This subscriber may also include [tokio-console](https://github.com/tokio-rs/console) (a utility from the Tokio project that lets you inspect all running async tasks in real time) if you run `florestad` with the `tokio-console` feature. You can learn more about tokio console usage in the [Floresta doc folder](https://github.com/getfloresta/Floresta/blob/master/doc/run.md#using-tokio-console).
 
 After that, we spawn a process that waits for the `Ctrl+C` signal, and when it's read this task writes `true` to the signal variable (an `Arc<RwLock<bool>>`).
 
@@ -157,7 +157,7 @@ You may also want to disable `Assume-Utreexo`, the UTXO set snapshot sync we dis
 florestad --no-assume-utreexo
 ```
 
-It's highly recommended to take a look at the [Floresta doc folder](https://github.com/vinteumorg/Floresta/blob/master/doc), where many more details about building, running and testing Floresta are available.
+It's highly recommended to take a look at the [Floresta doc folder](https://github.com/getfloresta/Floresta/blob/master/doc), where many more details about building, running and testing Floresta are available.
 
 ### Florestad::start
 
