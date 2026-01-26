@@ -10,10 +10,10 @@ Blocks fetched by `UtreexoNode` are passed to a blockchain backend for validatio
 
 Below is the actual type definition, which is a struct with two fields and trait bounds for the `Chain` backend.
 
-Filename: floresta-wire/src/p2p_wire/node.rs
+Filename: floresta-wire/src/p2p_wire/node/mod.rs
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/mod.rs
 #
 pub struct UtreexoNode<Chain: ChainBackend, Context = RunningNode> {
     pub(crate) common: NodeCommon<Chain>,

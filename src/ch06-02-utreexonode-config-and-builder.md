@@ -6,10 +6,10 @@ While `ChainSelector`, `SyncNode`, and `RunningNode` provide `impl` blocks for `
 
 ### UtreexoNode Builder
 
-Let's start with the builder function, taking a `UtreexoNodeConfig`, the `Chain` backend, a mempool type, optional compact block filters from the `floresta-compact-filters` crate, a kill signal to stop the node, and the address manager backend (that we will see [later in this chapter](ch06-04-address-manager.md)).
+Let's start with the builder function, taking a `UtreexoNodeConfig`, the `Chain` backend, a floresta mempool type, optional compact block filters from the `floresta-compact-filters` crate, a kill signal to stop the node, and the address manager backend (that we will see [later in this chapter](ch06-04-address-manager.md)).
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/mod.rs
 #
 impl<T, Chain> UtreexoNode<Chain, T>
 where
@@ -79,7 +79,7 @@ where
 
 The `UtreexoNodeConfig` type outlines all the customizable options for running a `UtreexoNode`. It specifies essential settings like the network, connection preferences, and resource management options. It also has a `UtreexoNodeConfig::default` implementation. This type is better explained below.
 
-Then, the `Mempool` type that we see in the signature is a very simple mempool implementation for broadcasting transactions to the network.
+Then, the `Mempool` type that we see in the signature is a simple mempool implementation for broadcasting transactions to the network.
 
 The first line creates an unbounded **multi-producer, single-consumer** (mpsc) channel, allowing multiple tasks in the `UtreexoNode` to send messages (via the sender `node_tx`) to a central task that processes them (via the receiver `node_rx`). If you are not familiar with channels, there's [a section from the Rust book](https://doc.rust-lang.org/book/ch16-02-message-passing.html) that covers them. Here, we use `tokio` channels instead of Rust's standard library channels.
 
