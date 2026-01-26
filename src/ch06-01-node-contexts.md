@@ -62,6 +62,8 @@ pub trait NodeContext {
     const BLOCKS_PER_GETDATA: usize = 5;
     # /// How many concurrent GETDATA packages we can send at the same time
     const MAX_CONCURRENT_GETDATA: usize = 10;
+    # /// How often we perform the main loop maintenance tasks (checking for timeouts, peers, etc.)
+    const MAINTENANCE_TICK: Duration = Duration::from_secs(1);
 
     fn get_required_services(&self) -> ServiceFlags {
         ServiceFlags::NETWORK
@@ -118,6 +120,6 @@ where
 
 Since `UtreexoNode<RunningNode, _>`, `UtreexoNode<SyncNode, _>`, and `UtreexoNode<ChainSelector, _>` are all entirely different types (because Rust considers each generic parameter combination a separate type), we cannot mistakenly use methods that are not intended for a specific context.
 
-The only shared functionality is that which is implemented generically for `T: NodeContext`, which all three contexts satisfy, located in _p2p_wire/node.rs_ (as we have seen [in the previous section](ch06-00-utreexonode-in-depth.md)).
+The shared functionality is what is implemented generically for `T: NodeContext`, which all three contexts satisfy (as we have seen [in the previous section](ch06-00-utreexonode-in-depth.md)).
 
 In the next sections within this chapter we will see some of these shared functions and methods implementations.

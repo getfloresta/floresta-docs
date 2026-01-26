@@ -15,7 +15,7 @@ If successful, we get the transport reader and writer, which are of type `ReadTr
 It then sets up an 'actor', that is, an independent component that reads incoming messages and communicates them to the 'actor receiver'. The actor is effectively a transport reader wrapper.
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/conn.rs
 #
 pub(crate) async fn open_non_proxy_connection(
     kind: ConnectionKind,
@@ -81,7 +81,7 @@ By the end of this function, a fully initialized `Peer` is ready to manage commu
 The `open_proxy_connection` is pretty much the same, except we get the transport reader and writer from the proxy connection instead, handled by `transport::connect_proxy`.
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/conn.rs
 #
 pub(crate) async fn open_proxy_connection(
     proxy: SocketAddr,

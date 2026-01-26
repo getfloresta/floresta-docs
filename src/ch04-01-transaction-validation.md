@@ -17,7 +17,7 @@ pub fn validate_block_no_acc(
     #
     # let bip34_height = self.chain_params().params.bip34_height;
     # // If bip34 is active, check that the encoded block height is correct
-    # if height >= bip34_height && self.get_bip34_height(block) != Some(height) {
+    # if height >= bip34_height && Consensus::get_bip34_height(block) != Some(height) {
         # return Err(BlockValidationErrors::BadBip34)?;
     # }
     #
@@ -169,10 +169,8 @@ pub fn verify_block_transactions(
     let coinbase_total = transactions[0]
         .output
         .iter()
-        .try_fold(Amount::ZERO, |acc, out| {
-            acc.checked_add(out.value)
-                .ok_or(BlockValidationErrors::TooManyCoins)
-        })?;
+        .try_fold(Amount::ZERO, |acc, out| acc.checked_add(out.value))
+        .ok_or(BlockValidationErrors::TooManyCoins)?;
 
     if coinbase_total > allowed_reward {
         return Err(BlockValidationErrors::BadCoinbaseOutValue)?;

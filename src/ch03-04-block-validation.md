@@ -23,7 +23,7 @@ pub fn validate_block_no_acc(
 
     let bip34_height = self.chain_params().params.bip34_height;
     // If bip34 is active, check that the encoded block height is correct
-    if height >= bip34_height && self.get_bip34_height(block) != Some(height) {
+    if height >= bip34_height && Consensus::get_bip34_height(block) != Some(height) {
         return Err(BlockValidationErrors::BadBip34)?;
     }
 

@@ -10,10 +10,10 @@ The two fields of `UtreexoNode` are the `NodeCommon<Chain>` struct and the gener
 
 `NodeCommon` represents the core state and data required for node operations, independent of the context. It keeps the `Chain` backend, optional compact block filters, the mempool, the `UtreexoNodeConfig` and `Network`, peer connection data, networking configurations, and time-based events to enable effective node behavior and synchronization.
 
-Filename: floresta-wire/src/p2p_wire/node.rs
+Filename: floresta-wire/src/p2p_wire/node/mod.rs
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/mod.rs
 #
 pub struct NodeCommon<Chain: ChainBackend> {
     // 1. Core Blockchain and Transient Data
@@ -71,10 +71,10 @@ pub struct UtreexoNode<Chain: ChainBackend, Context = RunningNode> {
 
 On the other hand, the `Context` generic in `UtreexoNode` will allow the node to implement additional functionality and manage data specific to a particular context. This is explained in the [next section](ch06-01-node-contexts.md).
 
-Although the `Context` generic in the type definition is not constrained by any trait, in the `UtreexoNode` implementation block (from the same _node.rs_ file), this generic is bound by both a `NodeContext` trait and the `Default` trait.
+Although the `Context` generic in the type definition is not constrained by any trait, in the `UtreexoNode` implementation blocks this generic is bound by both a `NodeContext` trait and the `Default` trait.
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/mod.rs
 #
 impl<T, Chain> UtreexoNode<Chain, T>
 where
@@ -94,7 +94,7 @@ In this implementation block, we also encounter a `WireError`, which serves as t
 To avoid repetitively calling `self.common.field_name` to access the many inner `NodeCommon` fields, `UtreexoNode` implements the `Deref` and `DerefMut` traits. This means that we can access the `NodeCommon` fields as if they were fields of `UtreexoNode`.
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/mod.rs
 #
 impl<Chain: ChainBackend, T> Deref for UtreexoNode<Chain, T> {
     fn deref(&self) -> &Self::Target {

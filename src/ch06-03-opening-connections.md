@@ -7,7 +7,7 @@ In this section we are finally going to understand how Floresta connects to peer
 The `maybe_open_connection` method determines whether the node should establish a new connection to a peer and, if so, calls `create_connection`.
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/conn.rs
 #
 pub(crate) fn maybe_open_connection(
     &mut self,
@@ -21,9 +21,9 @@ pub(crate) fn maybe_open_connection(
 
     // If we've tried getting some connections, but the addresses we have are not
     // working. Try getting some more addresses from DNS
-    self.maybe_ask_for_dns_peers();
+    self.maybe_ask_dns_seed_for_addresses();
     let needs_utreexo = required_service.has(service_flags::UTREEXO.into());
-    self.maybe_use_hadcoded_addresses(needs_utreexo);
+    self.maybe_use_hardcoded_addresses(needs_utreexo);
 
     // Try to connect with manually added peers
     self.maybe_open_connection_with_added_peers()?;
@@ -46,7 +46,7 @@ The `ConnectionKind` struct that `create_connection` takes as argument is explai
 ### Connection Kinds
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/mod.rs
 #
 pub enum ConnectionKind {
     Feeler,
@@ -72,7 +72,7 @@ Extra connections extend the node’s reach by connecting to additional peers fo
 If no fixed peer is specified, we get a suitable peer address (or `LocalAddress`) for connection by calling `self.address_man.get_address_to_connect`. This method takes the required services and a boolean indicating whether a feeler connection is desired. We will explore this method in the next section.
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/conn.rs
 #
 pub(crate) fn create_connection(&mut self, kind: ConnectionKind) -> Result<(), WireError> {
     let required_services = match kind {
@@ -146,7 +146,7 @@ Moving on to `open_connection`, we create a new `unbounded_channel` for sending 
 Then, depending on the value of `self.socks5` we will call `UtreexoNode::open_proxy_connection` or `UtreexoNode::open_non_proxy_connection`. Each one of these functions will create a `Peer` instance with the provided data and the channel receiver.
 
 ```rust
-# // Path: floresta-wire/src/p2p_wire/node.rs
+# // Path: floresta-wire/src/p2p_wire/node/conn.rs
 #
 pub(crate) fn open_connection(
     &mut self,
@@ -232,7 +232,7 @@ pub(crate) fn open_connection(
 }
 ```
 
-Last of all, we simply insert the new inflight request (via the `InflightRequests` type) to our tracker `HashMap`, as well as the new peer (via the `LocalPeerView`). Both types are also defined in _p2p_wire/node.rs_, along with `UtreexoNode`, `NodeCommon`, `ConnectionKind`, and a few other types.
+Last of all, we simply insert the new inflight request (via the `InflightRequests` type) to our tracker `HashMap`, as well as the new peer (via the `LocalPeerView`). Both types are defined in _p2p_wire/node/mod.rs_, along with `UtreexoNode`, `NodeCommon`, `ConnectionKind`, and a few other types.
 
 ### Recap
 
