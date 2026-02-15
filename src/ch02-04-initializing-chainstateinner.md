@@ -5,7 +5,6 @@ This is the struct that holds the meat of the matter (or should we say the root 
 - `acc`: The accumulator, of type `Stump` (which comes from the `rustreexo` crate).
 - `chainstore`: Our implementation of `ChainStore`.
 - `best_block`: Of type `BestChain`.
-- `broadcast_queue`: Holds a list of transactions to be broadcast, of type `Vec<Transaction>`.
 - `subscribers`: A vector of trait objects (different types allowed) that implement the `BlockConsumer` trait, indicating they want to get notified when a new valid block arrives.
 - `fee_estimation`: Fee estimation for the next 1, 10 and 20 blocks, as a tuple of three f64.
 - `ibd`: A boolean indicating if we are in IBD.
@@ -74,7 +73,6 @@ pub fn new(
                 validation_index: genesis.block_hash(),
                 alternative_tips: Vec::new(),
             },
-            broadcast_queue: Vec::new(),
             subscribers: Vec::new(),
             fee_estimation: (1_f64, 1_f64, 1_f64),
             ibd: true,
@@ -85,7 +83,7 @@ pub fn new(
 }
 ```
 
-The TLDR is that we move `chainstore` to the `ChainStateInner`, initialize the accumulator (`Stump::new`), initialize `BestChain` with the genesis block (being the best block and best validated block) and depth 0, initialize `broadcast_queue` and `subscribers` as empty vectors, set the minimum fee estimations, set `ibd` to true, use the `Consensus` parameters for the current `Network` and move the `assume_valid` optional hash in.
+The TLDR is that we move `chainstore` to the `ChainStateInner`, initialize the accumulator (`Stump::new`), initialize `BestChain` with the genesis block (being the best block and best validated block) and depth 0, initialize `subscribers` as empty vector, set the minimum fee estimations, set `ibd` to true, use the `Consensus` parameters for the current `Network` and move the `assume_valid` optional hash in.
 
 {{#quiz ../quizzes/ch02-04-initializing-chainstateinner.toml}}
 

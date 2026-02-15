@@ -15,13 +15,11 @@ The list of required methods:
 - `get_block_hash`, given a u32 height.
 - `get_tx`, given its txid.
 - `get_height` of the chain.
-- `broadcast` a transaction to the network.
 - `estimate_fee` for inclusion in usize target blocks.
 - `get_block`, given its hash.
 - `get_best_block` hash and height.
 - `get_block_header`, given its hash.
 - `is_in_ibd`, whether we are in Initial Block Download (IBD) or not.
-- `get_unbroadcasted` transactions.
 - `is_coinbase_mature`, given its block hash and height (on the mainchain, coinbase transactions mature after 100 blocks).
 - `get_block_locator`, i.e., a compact list of block hashes used to efficiently identify the most recent common point in the blockchain between two nodes for synchronization purposes.
 - `get_block_locator_for_tip`, given the hash of the tip block. This can be used for tips that are not canonical or best.
@@ -49,8 +47,6 @@ pub trait BlockchainInterface {
     #
     # fn get_height(&self) -> Result<u32, Self::Error>;
     #
-    # fn broadcast(&self, tx: &bitcoin::Transaction) -> Result<(), Self::Error>;
-    #
     # fn estimate_fee(&self, target: usize) -> Result<f64, Self::Error>;
     #
     # fn get_block(&self, hash: &BlockHash) -> Result<Block, Self::Error>;
@@ -63,8 +59,6 @@ pub trait BlockchainInterface {
     // ...
     #
     # fn is_in_ibd(&self) -> bool;
-    #
-    # fn get_unbroadcasted(&self) -> Vec<Transaction>;
     #
     # fn is_coinbase_mature(&self, height: u32, block: BlockHash) -> Result<bool, Self::Error>;
     #

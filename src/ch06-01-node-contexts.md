@@ -42,8 +42,6 @@ pub trait NodeContext {
     const ASSUME_STALE: u64 = 15 * 60; // 15 minutes
     # /// While on IBD, if we've been without blocks for this long, ask for headers again
     const IBD_REQUEST_BLOCKS_AGAIN: u64 = 30; // 30 seconds
-    # /// How often we broadcast transactions
-    const BROADCAST_DELAY: u64 = 30; // 30 seconds
     # /// Max number of simultaneous inflight requests we allow
     const MAX_INFLIGHT_REQUESTS: usize = 1_000;
     # /// Interval at which we open new feeler connections

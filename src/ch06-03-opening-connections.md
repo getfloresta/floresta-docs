@@ -13,6 +13,9 @@ pub(crate) fn maybe_open_connection(
     &mut self,
     required_service: ServiceFlags,
 ) -> Result<(), WireError> {
+    // Try to connect with manually added peers
+    self.maybe_open_connection_with_added_peers()?;
+
     // If the user passes in a `--connect` cli argument, we only connect with
     // that particular peer.
     if self.fixed_peer.is_some() && !self.peers.is_empty() {
@@ -24,9 +27,6 @@ pub(crate) fn maybe_open_connection(
     self.maybe_ask_dns_seed_for_addresses();
     let needs_utreexo = required_service.has(service_flags::UTREEXO.into());
     self.maybe_use_hardcoded_addresses(needs_utreexo);
-
-    // Try to connect with manually added peers
-    self.maybe_open_connection_with_added_peers()?;
 
     let connection_kind = ConnectionKind::Regular(required_service);
     if self.peers.len() < T::MAX_OUTGOING_PEERS {
@@ -204,7 +204,7 @@ pub(crate) fn open_connection(
         peer_count,
         LocalPeerView {
             // Fields omitted for brevity :P
-            # message_times: FractionAvg::new(0, 0),
+            # message_times: Ema::with_half_life_50(),
             # address: address.get_net_address(),
             # port: address.get_port(),
             # user_agent: "".to_string(),
