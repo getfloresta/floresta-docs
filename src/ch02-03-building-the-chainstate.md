@@ -91,7 +91,6 @@ pub fn new(
                 # validation_index: genesis.block_hash(),
                 # alternative_tips: Vec::new(),
             # },
-            # broadcast_queue: Vec::new(),
             # subscribers: Vec::new(),
             # fee_estimation: (1_f64, 1_f64, 1_f64),
             # ibd: true,

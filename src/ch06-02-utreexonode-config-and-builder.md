@@ -39,7 +39,7 @@ where
                 // Initialization of many fields :P
                 # last_dns_seed_call: Instant::now(),
                 # startup_time: Instant::now(),
-                # block_sync_avg: FractionAvg::new(0, 0),
+                # block_sync_avg: Ema::with_half_life_1000(),
                 # last_filter: chain.get_block_hash(0).unwrap(),
                 # block_filters,
                 # inflight: HashMap::new(),
@@ -58,7 +58,6 @@ where
                 # last_tip_update: Instant::now(),
                 # last_connection: Instant::now(),
                 # last_peer_db_dump: Instant::now(),
-                # last_broadcast: Instant::now(),
                 # last_feeler: Instant::now(),
                 # blocks: HashMap::new(),
                 # last_get_address_request: Instant::now(),
@@ -107,7 +106,7 @@ Let's now check what are the customizable options for the node, that is, the `Ut
 
 It starts with the `network` field (i.e. `Bitcoin`, `Testnet`, `Regtest` or `Signet`). Next we find the key options to enable `pow_fraud_proofs` for a very fast node sync, which we learned about in the [PoW Fraud Proofs Sync](ch05-00-advanced-chain-validation-methods.md#pow-fraud-proofs-sync) section from last chapter, and `compact_filters` for lightweight blockchain rescans.
 
-A fixed peer can be specified via `fixed_peer`, and settings like `max_banscore`, `max_outbound`, and `max_inflight` allow fine-tuning of peer management, connection limits, and parallel requests.
+A fixed peer can be specified via `fixed_peer`, which ensures your node only connects to a specific set of peers.
 
 Filename: p2p_wire/mod.rs
 
@@ -129,20 +128,14 @@ pub struct UtreexoNodeConfig {
     # /// needing to download the whole chain. It will download ~1GB of filters, and then
     # /// download the blocks that match the filters.
     pub compact_filters: bool,
-    # /// Fixed peers to connect to. Defaults to None.
-    # ///
-    # /// If you want to connect to a specific peer, you can set this to a string with the
-    # /// format `ip:port`. For example, `localhost:8333`.
+    /// Fixed peers to connect to. Defaults to None.
+    ///
+    /// If you want to connect to a specific peer, you can set this to a string with the
+    /// format `ip:port`. For example, `localhost:8333`.
     pub fixed_peer: Option<String>,
     /// If a peer misbehaves, we increase its ban score. If the ban score reaches this value,
     /// we disconnect from the peer. Defaults to 100.
     pub max_banscore: u32,
-    /// Maximum number of outbound connections. Defaults to 8.
-    pub max_outbound: u32,
-    /// Maximum number of inflight requests. Defaults to 10.
-    ///
-    /// More inflight requests means more memory usage, but also more parallelism.
-    pub max_inflight: u32,
     // ...
     # /// Data directory for the node. Defaults to `.floresta-node`.
     # pub datadir: String,
@@ -184,8 +177,6 @@ pub struct UtreexoNodeConfig {
             # compact_filters: false,
             # fixed_peer: None,
             # max_banscore: 100,
-            # max_outbound: 8,
-            # max_inflight: 10,
             # datadir: ".floresta-node".to_string(),
             # proxy: None,
             # backfill: false,
@@ -226,12 +217,6 @@ Additional configurations include `datadir` for specifying the node's data direc
     # /// If a peer misbehaves, we increase its ban score. If the ban score reaches this value,
     # /// we disconnect from the peer. Defaults to 100.
     # pub max_banscore: u32,
-    # /// Maximum number of outbound connections. Defaults to 8.
-    # pub max_outbound: u32,
-    # /// Maximum number of inflight requests. Defaults to 10.
-    # ///
-    # /// More inflight requests means more memory usage, but also more parallelism.
-    # pub max_inflight: u32,
     # /// Data directory for the node. Defaults to `.floresta-node`.
     // ...
     pub datadir: String,
@@ -273,8 +258,6 @@ Additional configurations include `datadir` for specifying the node's data direc
             # compact_filters: false,
             # fixed_peer: None,
             # max_banscore: 100,
-            # max_outbound: 8,
-            # max_inflight: 10,
             # datadir: ".floresta-node".to_string(),
             # proxy: None,
             # backfill: false,

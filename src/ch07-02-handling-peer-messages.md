@@ -63,7 +63,8 @@ pub async fn read_loop(mut self) -> Result<()> {
     # if err.is_err() {
         # debug!("Peer {} connection loop closed: {err:?}", self.id);
     # }
-    # self.send_to_node(PeerMessages::Disconnected(self.address_id));
+    # let now = Instant::now();
+    # self.send_to_node(PeerMessages::Disconnected(self.address_id), now);
     # // force the stream to shutdown to prevent leaking resources
     # if let Err(shutdown_err) = self.writer.shutdown().await {
         # debug!(
@@ -124,8 +125,8 @@ async fn peer_loop_inner(&mut self) -> Result<()> {
                     Some(ReaderMessage::Error(e)) => {
                         return Err(e);
                     }
-                    Some(ReaderMessage::Message(msg)) => {
-                        self.handle_peer_message(msg).await?;
+                    Some(ReaderMessage::Message(msg, time)) => {
+                        self.handle_peer_message(msg, time).await?;
                     }
                 }
             }
@@ -219,8 +220,8 @@ async fn peer_loop_inner(&mut self) -> Result<()> {
                     # Some(ReaderMessage::Error(e)) => {
                         # return Err(e);
                     # }
-                    # Some(ReaderMessage::Message(msg)) => {
-                        # self.handle_peer_message(msg).await?;
+                    # Some(ReaderMessage::Message(msg, time)) => {
+                        # self.handle_peer_message(msg, time).await?;
                     # }
                 # }
             # }
@@ -318,8 +319,8 @@ async fn peer_loop_inner(&mut self) -> Result<()> {
                     # Some(ReaderMessage::Error(e)) => {
                         # return Err(e);
                     # }
-                    # Some(ReaderMessage::Message(msg)) => {
-                        # self.handle_peer_message(msg).await?;
+                    # Some(ReaderMessage::Message(msg, time)) => {
+                        # self.handle_peer_message(msg, time).await?;
                     # }
                 # }
             # }

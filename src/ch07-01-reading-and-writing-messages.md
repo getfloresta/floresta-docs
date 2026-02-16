@@ -45,7 +45,7 @@ Note that the messages of the channel between `MessageActor` and `Peer` are of t
 # // Path: floresta-wire/src/p2p_wire/peer.rs
 #
 pub enum ReaderMessage {
-    Message(NetworkMessage),
+    Message(NetworkMessage, Instant),
     Error(PeerError),
 }
 ```
@@ -63,7 +63,8 @@ The `run` method simply invokes the `inner` method, and if it fails we notify th
 async fn inner(&mut self) -> std::result::Result<(), PeerError> {
     loop {
         let msg = self.transport.read_message().await?;
-        self.sender.send(ReaderMessage::Message(msg))?;
+        let now = Instant::now();
+        self.sender.send(ReaderMessage::Message(msg, now))?;
     }
 }
 
