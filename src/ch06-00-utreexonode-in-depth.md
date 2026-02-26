@@ -54,6 +54,7 @@ pub struct NodeCommon<Chain: ChainBackend> {
     pub(crate) last_feeler: Instant,
     pub(crate) startup_time: Instant,
     pub(crate) last_dns_seed_call: Instant,
+    pub(crate) used_fixed_addresses: bool,
 
     // 6. Configuration and Metadata
     pub(crate) config: UtreexoNodeConfig,
