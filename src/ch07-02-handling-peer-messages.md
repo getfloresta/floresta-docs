@@ -28,6 +28,7 @@ pub fn create_peer<W: AsyncWrite + Unpin + Send + Sync + 'static>(
         # mempool,
         # last_ping: None,
         # last_message: Instant::now(),
+        # last_addrv2: Instant::now() - Duration::from_secs(ADDRV2_MESSAGE_INTERVAL_SECS),
         # node_tx,
         # services: ServiceFlags::NONE,
         # messages: 0,

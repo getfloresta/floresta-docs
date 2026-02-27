@@ -17,27 +17,12 @@ pub fn validate_block_no_acc(
     height: u32,
     inputs: HashMap<OutPoint, UtxoData>,
 ) -> Result<(), BlockchainError> {
-    if !block.check_merkle_root() {
-        return Err(BlockValidationErrors::BadMerkleRoot)?;
-    }
-
-    let bip34_height = self.chain_params().params.bip34_height;
-    // If bip34 is active, check that the encoded block height is correct
-    if height >= bip34_height && Consensus::get_bip34_height(block) != Some(height) {
-        return Err(BlockValidationErrors::BadBip34)?;
-    }
-
-    if !block.check_witness_commitment() {
-        return Err(BlockValidationErrors::BadWitnessCommitment)?;
-    }
-
-    if block.weight().to_wu() > 4_000_000 {
-        return Err(BlockValidationErrors::BlockTooBig)?;
-    }
+    read_lock!(self).consensus.check_block(block, height)?;
 
     // Validate block transactions
     let subsidy = read_lock!(self).consensus.get_subsidy(height);
     let verify_script = self.verify_script(height)?;
+
     #[cfg(feature = "bitcoinkernel")]
     let flags = self
         .chain_params()
@@ -57,12 +42,12 @@ pub fn validate_block_no_acc(
 }
 ```
 
-In order, we do the following things:
+First, we call the `check_block` method which performs the following checks:
 
-1. Call `check_merkle_root` on the `block`, to check that the merkle root commits to all the transactions.
-2. Check that if the height is greater or equal than that of the activation of [BIP 34](https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki), the coinbase transaction encodes the height as specified.
-3. Call `check_witness_commitment`, to check that the `wtxid` merkle root is included in the coinbase transaction as per [BIP 141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki).
-4. Finally, check that the block weight doesn't exceed the 4,000,000 weight unit limit.
+1. `check_merkle_root`, to ensure that the merkle root in the header commits to all the transactions, and block data has not been tampered with.
+2. Check that, if the height is at least that of [BIP 34](https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki) activation, the coinbase transaction encodes the height as specified.
+3. `check_witness_commitment`, to check that the `wtxid` merkle root is included in the coinbase transaction as per [BIP 141](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki).
+4. Check that the block weight doesn't exceed the 4,000,000 weight unit limit.
 
 Lastly, we go on to validate the transactions. We retrieve the current subsidy (the newly generated coins) with the `get_subsidy` method on our `Consensus` struct. We also call the `verify_script` method which returns a boolean flag indicating if we are NOT inside the `Assume-Valid` range.
 

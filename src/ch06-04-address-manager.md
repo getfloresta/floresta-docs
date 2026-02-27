@@ -10,14 +10,21 @@ Filename: p2p_wire/address_man.rs
 # // Path: floresta-wire/src/p2p_wire/address_man.rs
 #
 pub struct AddressMan {
+    /// A map of all peers we know, mapping the address id to the actual address.
     addresses: HashMap<usize, LocalAddress>,
+
     good_addresses: Vec<usize>,
     good_peers_by_service: HashMap<ServiceFlags, Vec<usize>>,
     peers_by_service: HashMap<ServiceFlags, Vec<usize>>,
+
+    /// The maximum number of entries this address manager can hold
+    max_size: usize,
+    /// The networks we can reach (e.g., IPv4, IPv6, TorV3, etc.)
+    reachable_networks: HashSet<ReachableNetworks>,
 }
 ```
 
-This struct is straightforward: it keeps known peer addresses in a `HashMap` (as `LocalAddress`), the indexes of good peers in the map, and associates peers with the services they support.
+This struct is straightforward: it keeps known peer addresses in a `HashMap` (as `LocalAddress`), the indexes of good peers in the map, and links peers with the network services they support (including the `UTREEXO` service bit).
 
 ### Local Address
 
@@ -76,7 +83,7 @@ Let's finally inspect the `get_address_to_connect` method on the `AddressMan`, w
 This method selects a peer address for a new connection based on required services and whether the connection is a feeler. First of all, we will return `None` if the address manager doesn't have any peers. Otherwise:
 
 - For feeler connections, it randomly picks an address, or returns `None` if the peer is `Banned` or already `Connected`.
-- For regular connections, it prioritizes peers supporting the required services or falls back to a random address. Peers in the `NeverTried` and `Tried` states are considered valid, `Connected` ones are skipped, and `Banned` and `Failed` ones are only accepted if enough time has passed. If no suitable address is found, it returns `None`.
+- For regular connections, it prioritizes peers supporting the required services or falls back to a random address. Peers in the `NeverTried` and `Tried` states are considered valid, `Connected` and `Banned` peers are skipped, and `Failed` ones are only accepted if enough time has passed. If no suitable address is found, it returns `None`.
 
 ```rust
 # // Path: floresta-wire/src/p2p_wire/address_man.rs
@@ -99,11 +106,14 @@ pub fn get_address_to_connect(
         let idx = rand::random::<usize>() % self.addresses.len();
         let peer = self.addresses.keys().nth(idx)?;
         let address = self.addresses.get(peer)?.to_owned();
+
+        // don't try to connect to a peer that is banned or already connected
         if matches!(address.state, AddressState::Banned(_))
             | matches!(address.state, AddressState::Connected)
         {
             return None;
         }
+
         return Some((*peer, address));
     };
 
@@ -116,16 +126,14 @@ pub fn get_address_to_connect(
             AddressState::NeverTried | AddressState::Tried(_) => {
                 return Some((id, peer));
             }
+
             AddressState::Connected => {
+                // if we are connected to this peer, don't try to connect again
                 continue;
             }
 
-            AddressState::Banned(when) | AddressState::Failed(when) => {
-                let now = SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs();
-
+            AddressState::Failed(when) => {
+                let now = Self::time_since_unix();
                 if when + RETRY_TIME < now {
                     return Some((id, peer));
                 }
@@ -136,6 +144,8 @@ pub fn get_address_to_connect(
 
                 self.good_addresses.retain(|&x| x != id);
             }
+
+            AddressState::Banned(_) => {}
         }
     }
 

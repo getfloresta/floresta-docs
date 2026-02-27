@@ -62,6 +62,7 @@ where
                 # blocks: HashMap::new(),
                 # last_get_address_request: Instant::now(),
                 # last_send_addresses: Instant::now(),
+                # used_fixed_addresses: false,
                 # datadir: config.datadir.clone(),
                 # max_banscore: config.max_banscore,
                 # socks5,
