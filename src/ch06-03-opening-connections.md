@@ -15,10 +15,18 @@ pub(crate) fn maybe_open_connection(
 ) -> Result<(), WireError> {
     // Try to connect with manually added peers
     self.maybe_open_connection_with_added_peers()?;
+    if self.connected_peers() >= T::MAX_OUTGOING_PEERS {
+        return Ok(());
+    }
+
+    let connection_kind = ConnectionKind::Regular(required_service);
 
     // If the user passes in a `--connect` cli argument, we only connect with
     // that particular peer.
-    if self.fixed_peer.is_some() && !self.peers.is_empty() {
+    if self.fixed_peer.is_some() {
+        if self.peers.is_empty() {
+            self.create_connection(connection_kind)?;
+        }
         return Ok(());
     }
 
@@ -28,53 +36,74 @@ pub(crate) fn maybe_open_connection(
     let needs_utreexo = required_service.has(service_flags::UTREEXO.into());
     self.maybe_use_hardcoded_addresses(needs_utreexo);
 
-    let connection_kind = ConnectionKind::Regular(required_service);
-    if self.peers.len() < T::MAX_OUTGOING_PEERS {
-        self.create_connection(connection_kind)?;
+    for _ in 0..T::NEW_CONNECTIONS_BATCH_SIZE {
+        // Ignore the error so we don't break out of the loop
+        let _ = self.create_connection(connection_kind);
     }
 
     Ok(())
 }
 ```
 
-If the user has specified a fixed peer via the `--connect` command-line argument (`self.fixed_peer.is_some()`) and there are already connected peers (`!self.peers.is_empty()`), the method does nothing and exits early. This is because we have already connected to the fixed peer.
+If the user has specified a fixed peer via the `--connect` command-line argument (`self.fixed_peer.is_some()`), the method tries to establish that fixed connection if needed and returns.
 
-Also, if the number of peers is below the maximum allowed (`self.peers.len() < T::MAX_OUTGOING_PEERS`), it calls the `create_connection` method to establish a new 'regular' connection to a peer.
+Else, if we didn't specify a fixed peer and the number of peers is below the maximum allowed (`self.connected_peers() < T::MAX_OUTGOING_PEERS`), we call the `create_connection` method a few times to establish new 'regular' connections.
 
-The `ConnectionKind` struct that `create_connection` takes as argument is explained below.
+The `ConnectionKind` struct that `create_connection` takes as argument is shown below.
 
 ### Connection Kinds
 
 ```rust
 # // Path: floresta-wire/src/p2p_wire/node/mod.rs
 #
+/// The kind of connection we see this peer as.
+///
+/// Core's counterpart: <https://github.com/bitcoin/bitcoin/blob/bf9ef4f0433551e850a11c2da8baae0ec6439a99/src/node/connection_types.h#L18>.
 pub enum ConnectionKind {
+    /// A feeler connection is a short-lived connection used to check whether this peer is alive.
+    ///
+    /// After handshake, we ask for addresses and when we receive an answer we just disconnect,
+    /// marking this peer as alive in our address manager.
     Feeler,
-    // bitcoin::p2p::ServiceFlags
+
+    /// A regular peer, used to send requests to and learn about transactions and blocks.
     Regular(ServiceFlags),
+
+    /// An extra peer specially created if our tip hasn't moved for too long.
+    ///
+    /// If more than [`NodeContext::ASSUME_STALE`] seconds have passed since the
+    /// last processed block, we use this to make sure we are not in a partitioned subnet,
+    /// unable to learn about new blocks.
     Extra,
+
+    /// A connection that was manually requested by our user. This type of peer won't be banned on
+    /// misbehaving, and won't respect the [`ServiceFlags`] requirements when creating a
+    /// connection.
+    Manual,
 }
 ```
 
-#### Feeler Connections
-Feeler connections are temporary probes used to verify if a peer is still active, regardless of its supported services. These lightweight tests help maintain an up-to-date and reliable pool of peers, ensuring the node can quickly establish connections when needed.
+The only two long-lived connection kinds are `Regular`, for peers that satisfy certain service flags (e.g., support for Utreexo or compact block filters), and `Manual`, which are added by the user via `--connect` (fixed peer) or `--addnode`. These two connection kinds handle the bulk of the node operations, such as exchanging blocks, headers, transactions, and keeping the node in sync.
 
-#### Regular Connections
-Regular connections are the backbone of a node's peer-to-peer communication. These connections are established with trusted peers or those that meet specific service criteria (e.g., support for Utreexo or compact filters). Regular connections are long-lived and handle the bulk of the node's operations, such as exchanging blocks, headers, transactions, and keeping the node in sync.
-
-#### Extra Connections
-Extra connections extend the node’s reach by connecting to additional peers for specialized tasks, such as compact filter requests or fetching Utreexo proofs. These are temporary and created only when extra resources are required.
+`Feeler` and `Extra` connections, on the other hand, are short-lived connection kinds. `Feeler` connections serve as a probe to verify if a peer is still alive, and also to ask for new peer addresses. `Extra` peers are used in case our tip hasn't changed in a while, to temporarily increase our peer count and try to find new blocks. We create `Feeler` connections every few seconds, while `Extra` connections are less common and reserved for potential stale tip situations.
 
 ### Create Connection
 
-`create_connection` takes the required services for the connection kind, gets a peer address (prioritizing the fixed peer if specified), and ensures the peer isn’t already connected.
+`create_connection` takes the required services for the connection kind, gets a peer address (prioritizing the fixed peer if specified), and ensures the peer isn't already connected.
 
 If no fixed peer is specified, we get a suitable peer address (or `LocalAddress`) for connection by calling `self.address_man.get_address_to_connect`. This method takes the required services and a boolean indicating whether a feeler connection is desired. We will explore this method in the next section.
 
 ```rust
 # // Path: floresta-wire/src/p2p_wire/node/conn.rs
 #
-pub(crate) fn create_connection(&mut self, kind: ConnectionKind) -> Result<(), WireError> {
+pub(crate) fn create_connection(&mut self, mut kind: ConnectionKind) -> Result<(), WireError> {
+    let is_fixed = self.fixed_peer.is_some();
+
+    // Connection with fixed peers should be marked as `manual`, rather than `regular`
+    if is_fixed && matches!(kind, ConnectionKind::Regular(_)) {
+        kind = ConnectionKind::Manual;
+    }
+
     let required_services = match kind {
         ConnectionKind::Regular(services) => services,
         _ => ServiceFlags::NONE,
@@ -98,8 +127,8 @@ pub(crate) fn create_connection(&mut self, kind: ConnectionKind) -> Result<(), W
 
         return Err(WireError::NoAddressesAvailable);
     };
-
-    debug!("attempting connection with address={address:?} kind={kind:?}",);
+    #
+    # debug!("attempting connection with address={address:?} kind={kind:?}",);
 
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -115,7 +144,7 @@ pub(crate) fn create_connection(&mut self, kind: ConnectionKind) -> Result<(), W
         peer_addr.address == address.get_net_address() && peer_addr.port == address.get_port()
     };
 
-    if self.common.peers.iter().any(is_connected) {
+    if self.peers.iter().any(is_connected) {
         return Err(WireError::PeerAlreadyExists(
             address.get_net_address(),
             address.get_port(),
@@ -124,7 +153,6 @@ pub(crate) fn create_connection(&mut self, kind: ConnectionKind) -> Result<(), W
 
     // We allow V1 fallback only if the cli option was set, it's a --connect peer
     // or if we are connecting to a utreexo peer, since utreexod doesn't support V2 yet.
-    let is_fixed = self.fixed_peer.is_some();
     let allow_v1 = self.config.allow_v1_fallback
         || kind == ConnectionKind::Regular(UTREEXO.into())
         || is_fixed;
